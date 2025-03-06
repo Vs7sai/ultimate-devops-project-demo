@@ -17,7 +17,7 @@ jobs:
         - name: Setup Python 3.12
           uses: actions/setup-python@v4
           with:
-            python-version:3.12 
+            python-version: 3.12 
         
         # - name: Build
         #   run: |
@@ -25,10 +25,15 @@ jobs:
         #     go mod download
         #     go build -o product-catalog-service main.go
 
-        - name: unit tests
+        - name: Install dependencies
+            run: |
+                pip install pytest  
+
+        - name: Run unit tests
           run: |
             cd src/recommendation
-            py test ./...
+            pytest
+
     
     code-quality:
         runs-on: ubuntu-latest
