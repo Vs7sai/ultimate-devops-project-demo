@@ -101,21 +101,18 @@ jobs:
           run: | 
                sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/recommendation:${{github.run_id}}|" kubernetes/recommendation/deploy.yaml
         
-
-
+        
 
         
 
 
         - name: Commit and push changes
           run: |
-
-
             git config --global user.email "vamsisai523114@gmail.com"
             git config --global user.name "Vs7sai"
-            git add .                                                                      # kubernetes/recommendation/deploy.yaml
+            git add kubernetes/recommendation/deploy.yaml
             git commit -m "[CI]: update the recomendationtag"
-            git push origin iragani --force
+            git push origin HEAD:main -f
 
         
         
