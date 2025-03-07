@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: default
+  name:  opentelemetry-demo-recommendationservice
   labels:
     
     opentelemetry.io/name: opentelemetry-demo-recommendationservice
@@ -12,6 +12,8 @@ metadata:
     app.kubernetes.io/name: opentelemetry-demo-recommendationservice
     app.kubernetes.io/version: "1.12.0"
     app.kubernetes.io/part-of: opentelemetry-demo
+
+    
 spec:
   replicas: 2
   revisionHistoryLimit: 10
