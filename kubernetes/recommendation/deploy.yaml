@@ -4,6 +4,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name:  opentelemetry-demo-recommendationservice
+
+  
   labels:
     
     opentelemetry.io/name: opentelemetry-demo-recommendationservice
