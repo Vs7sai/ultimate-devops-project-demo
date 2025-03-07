@@ -101,13 +101,15 @@ jobs:
           run: | 
                sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/product-catalog:${{github.run_id}}|" kubernetes/recommendation/deploy.yaml
         
+
+        
         - name: Commit and push changes
           run: |
             git config --global user.email "vamsisai523114@gmail.com"
             git config --global user.name "Vs7sai"
             git add kubernetes/recommendation/deploy.yaml
             git commit -m "[CI]: Update product catalog image tag"
-            git push origin iragani
+            git push --set-upstream origin iragani
 
         
         
