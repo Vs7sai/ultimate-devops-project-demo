@@ -1,18 +1,31 @@
 # Copyright The OpenTelemetry Authors
 # SPDX-License-Identifier: Apache-2.0
 
-
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+# -----------------------------------
+# Stage 1: Install dependencies
+# -----------------------------------
+FROM --platform=linux/amd64 node:20-bullseye-slim AS deps
 
 WORKDIR /app
+
+# Prevent Cypress from downloading binary if not needed during build
+ENV CYPRESS_INSTALL_BINARY=0
 
 COPY ./src/frontend/package*.json ./
 RUN npm ci
 
-FROM node:20-alpine AS builder
-RUN apk add --no-cache libc6-compat protobuf-dev protoc
+# -----------------------------------
+# Stage 2: Build application
+# -----------------------------------
+FROM --platform=linux/amd64 node:20-bullseye-slim AS builder
+
 WORKDIR /app
+
+# Install protoc for grpc:generate
+RUN apt-get update && apt-get install -y \
+    protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY ./pb ./pb
 COPY ./src/frontend .
@@ -20,14 +33,22 @@ COPY ./src/frontend .
 RUN npm run grpc:generate
 RUN npm run build
 
-FROM node:20-alpine AS runner
+# -----------------------------------
+# Stage 3: Runtime image
+# -----------------------------------
+FROM --platform=linux/amd64 node:20-bullseye-slim AS runner
+
 WORKDIR /app
-RUN apk add --no-cache protobuf-dev protoc
+
+# Optional if your app needs protobuf at runtime
+RUN apt-get update && apt-get install -y \
+    protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+# Add non-root user
+RUN addgroup --system nodejs && adduser --system --ingroup nodejs nextjs
 
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/utils/telemetry/Instrumentation.js ./
@@ -44,4 +65,3 @@ ENV PORT=8080
 EXPOSE ${PORT}
 
 ENTRYPOINT ["npm", "start"]
-
